@@ -1,29 +1,50 @@
 {
-    "name": "@servicemanager/health-check",
-    "version": "1.0.0",
-    "description": "Node.js Health Check Utility",
-    "main": "index.js",
-    "scripts": {
-      "test": "echo \"Error: no test specified\" && exit 1",
-      "build": "tsc",
-      "prepare": "npm run build",
-      "version": "git add -A src",
-      "postversion": "git push && git push --tags"
-    },
-    "repository": {
-      "type": "git",
-      "url": "git+https://github.com/service-manager/health-check.git",
-      "directory": "dist"
-    },
-    "author": "Lyndon Buckley <git@lyndonbuckley.com>",
-    "license": "ISC",
-    "bugs": {
-      "url": "https://github.com/service-manager/health-check/issues"
-    },
-    "homepage": "https://github.com/service-manager/health-check#readme",
-    "devDependencies": {
-      "@types/node": "^16.7.1",
-      "typescript": "^4.3.5"
-    }
+  "name": "@service-manager/health-check",
+  "version": "1.0.0",
+  "description": "Node.js Health Check Utility",
+  "author": "Lyndon Buckley <git@lyndonbuckley.com>",
+  "homepage": "https://github.com/service-manager/health-check#readme",
+  "keywords": [
+    "health",
+    "healthcheck",
+    "check"
+  ],
+  "main": "dist/health-check.cjs.js",
+  "module": "dist/health-check.esm.js",
+  "browser": "dist/health-check.umd.js",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "rollup -c",
+    "build:types": "tsc -p ./tsconfig.json --outDir build --declaration true && api-extractor run",
+    "docs": "typedoc src --out docs",
+    "dev": "rollup -c -w",
+    "prepare": "npm run build",
+    "version": "git add -A src",
+    "postversion": "git push && git push --tags"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/service-manager/health-check.git",
+    "directory": "dist"
+  },
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/service-manager/health-check/issues"
+  },
+  "devDependencies": {
+    "@microsoft/api-extractor": "^7.18.7",
+    "@rollup/plugin-commonjs": "^20.0.0",
+    "@rollup/plugin-node-resolve": "^13.0.4",
+    "@rollup/plugin-typescript": "^8.2.5",
+    "@types/node": "^16.7.1",
+    "eslint": "^7.32.0",
+    "rollup": "^2.56.3",
+    "ts-node": "^10.2.1",
+    "tslib": "^2.3.1",
+    "typedoc": "^0.22.2",
+    "typescript": "^4.4.3"
   }
-  
+}
