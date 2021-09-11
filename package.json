@@ -1,6 +1,6 @@
 {
   "name": "@service-manager/health-check",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "Node.js Health Check Utility",
   "author": "Lyndon Buckley <git@lyndonbuckley.com>",
   "homepage": "https://github.com/service-manager/health-check#readme",
