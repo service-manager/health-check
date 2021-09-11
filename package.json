@@ -1,0 +1,29 @@
+{
+    "name": "@servicemanager/health-check",
+    "version": "1.0.0",
+    "description": "Node.js Health Check Utility",
+    "main": "index.js",
+    "scripts": {
+      "test": "echo \"Error: no test specified\" && exit 1",
+      "build": "tsc",
+      "prepare": "npm run build",
+      "version": "git add -A src",
+      "postversion": "git push && git push --tags"
+    },
+    "repository": {
+      "type": "git",
+      "url": "git+https://github.com/service-manager/health-check.git",
+      "directory": "dist"
+    },
+    "author": "Lyndon Buckley <git@lyndonbuckley.com>",
+    "license": "ISC",
+    "bugs": {
+      "url": "https://github.com/service-manager/health-check/issues"
+    },
+    "homepage": "https://github.com/service-manager/health-check#readme",
+    "devDependencies": {
+      "@types/node": "^16.7.1",
+      "typescript": "^4.3.5"
+    }
+  }
+  
