@@ -1,7 +1,7 @@
 import EventEmitter from "events";
 import {msSince} from "./function";
 import {HealthCheckEvent, HealthCheckStatus} from "./enum";
-import {HealthCheckEventPayload, HealthCheckStatusChange, Options} from "./interface";
+import {HealthCheckEventPayload, HealthCheckStatusChange, HealthCheckOptions} from "./interface";
 import {HealthCheckCallback, HealthCheckTimeout, StatusCount, StatusLast} from "./type";
 
 const DefaultInterval = 5000;
@@ -31,12 +31,12 @@ export class HealthCheck extends EventEmitter {
 
     readonly Timeout: HealthCheckTimeout = "timeout";
 
-    constructor(options: Options)
-    constructor(callback: HealthCheckCallback, options?: Options)
-    constructor(cbOrOpts: HealthCheckCallback | Options, opt?: Options) {
+    constructor(options: HealthCheckOptions)
+    constructor(callback: HealthCheckCallback, options?: HealthCheckOptions)
+    constructor(cbOrOpts: HealthCheckCallback | HealthCheckOptions, opt?: HealthCheckOptions) {
         super();
 
-        let options: Options = opt || {}
+        let options: HealthCheckOptions = opt || {}
         if (typeof cbOrOpts === "object") {
             options = cbOrOpts
         }

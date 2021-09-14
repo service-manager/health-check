@@ -1,7 +1,7 @@
 import {HealthCheckStatus} from "./enum";
 import {HealthCheckCallback} from "./type";
 
-export interface Options {
+export interface HealthCheckOptions {
     callback?: HealthCheckCallback,
     interval?: number,
     timeout?: number
