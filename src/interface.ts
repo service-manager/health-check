@@ -15,3 +15,4 @@ export interface EventPayload extends StatusChange {
     since?: Date | null,
     for?: number | null,
 }
+

@@ -1,33 +1,17 @@
 import EventEmitter from "events";
 import {msSince} from "./timeSince";
-import {Status} from "./enum";
-import {EventPayload, StatusChange} from "./interface";
-
+import {Status, Event} from "./enum";
+import {EventPayload, Options, StatusChange} from "./interface";
+import {Callback, StatusCount, StatusLast, TimeoutStatus} from "./type";
 const DefaultInterval = 5000;
 
-type StatusCount = {
-    up: number,
-    down: number,
-    timeout: number
-}
-type StatusLast = {
-    up: Date | null,
-    down: Date | null,
-    timeout: Date | null
-}
 
 
-
-export type TimeoutStatus = "timeout";
-export const TimeoutStatus: TimeoutStatus = "timeout";
-
-export type Result = Promise<boolean> | boolean;
-export type Callback = () => Result;
 
 
 
 export declare interface HealthCheck {
-    on(event: 'timeout', listener: (change: StatusChange) => void): this;
+    on(event: Event.Timeout, listener: (change: StatusChange) => void): this;
     on(event: 'change', listener: (event: EventPayload) => void): this;
     on(event: 'healthy', listener: (event: EventPayload) => void): this;
     on(event: 'unhealthy', listener: (event: EventPayload) => void): this;
@@ -48,6 +32,8 @@ export class HealthCheck extends EventEmitter {
     private readonly _timeout: number;
 
     private history: StatusChange[] = [];
+
+    readonly Timeout: TimeoutStatus = "timeout";
 
     constructor(callback: Callback, opts: Options = {}) {
         super();
@@ -91,8 +77,8 @@ export class HealthCheck extends EventEmitter {
         const timestamp = new Date();
 
         // emit every timeout event and then treat as down
-        if (status === TimeoutStatus) {
-            this.emit("timeout", {status,timestamp});
+        if (status === this.Timeout) {
+            this.emit(Event.Timeout, {status,timestamp});
             this._last.timeout = timestamp;
             this._count.timeout++;
             status = Status.Down;
@@ -124,13 +110,13 @@ export class HealthCheck extends EventEmitter {
             for: status === Status.Up ? this.upFor : this.downFor
         }
 
-        this.emit("status", eventPayload);
+        this.emit(Event.Status, eventPayload);
 
         // emit up and down events
         if (lastStatus === Status.Up && status !== Status.Up)
-            this.emit("down", eventPayload);
+            this.emit(Event.Down, eventPayload);
         if (lastStatus !== Status.Up && status === Status.Up)
-            this.emit("up", eventPayload);
+            this.emit(Event.Up , eventPayload);
 
         // set last status change timestamp
         this._changedAt = timestamp;
@@ -155,7 +141,7 @@ export class HealthCheck extends EventEmitter {
         return await new Promise((resolve) => {
             let id = setTimeout(() => {
                 clearTimeout(id);
-                resolve(TimeoutStatus);
+                resolve(this.Timeout);
             })
         })
     }
@@ -174,13 +160,13 @@ export class HealthCheck extends EventEmitter {
         if (!this._timer) return;
         clearInterval(this._timer);
         this._timer = null;
-        this.emit("stop");
+        this.emit(Event.Timeout);
     }
 
     start() {
         this.stop();
         this._timer = setInterval(this._tick.bind(this), this._interval);
-        this.emit("start");
+        this.emit(Event.Start);
     }
 
     get isUp(): boolean {
