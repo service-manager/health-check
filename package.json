@@ -7,8 +7,10 @@
   "homepage": "https://github.com/service-manager/health-check#readme",
   "keywords": [
     "health",
-    "healthcheck",
-    "check"
+    "check",
+    "health check",
+    "health-check",
+    "healthcheck"
   ],
   "main": "dist/health-check.cjs.js",
   "module": "dist/health-check.esm.js",
