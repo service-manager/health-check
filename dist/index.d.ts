@@ -21,8 +21,8 @@ export declare class HealthCheck extends EventEmitter {
     private readonly _timeout;
     private history;
     readonly Timeout: HealthCheckTimeout;
-    constructor(options: HealthCheckOptions);
-    constructor(callback: HealthCheckCallback, options?: HealthCheckOptions);
+    constructor(options?: HealthCheckOptions);
+    constructor(callback?: HealthCheckCallback, options?: HealthCheckOptions);
     private _status;
     private _setStatus;
     private _updateStatus;
