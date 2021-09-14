@@ -1,15 +1,16 @@
 import EventEmitter from "events";
 import {msSince} from "./function";
-import {HealthCheckStatus, HealthCheckEvent} from "./enum";
-import {EventPayload, Options, StatusChange} from "./interface";
-import {HealthCheckCallback, StatusCount, StatusLast, HealthCheckTimeout} from "./type";
+import {HealthCheckEvent, HealthCheckStatus} from "./enum";
+import {HealthCheckEventPayload, HealthCheckStatusChange, Options} from "./interface";
+import {HealthCheckCallback, HealthCheckTimeout, StatusCount, StatusLast} from "./type";
+
 const DefaultInterval = 5000;
 
 export declare interface HealthCheck {
-    on(event: HealthCheckEvent.Timeout, listener: (change: StatusChange) => void): this;
-    on(event: HealthCheckEvent.Change, listener: (event: EventPayload) => void): this;
-    on(event: HealthCheckEvent.Up, listener: (event: EventPayload) => void): this;
-    on(event: HealthCheckEvent.Down, listener: (event: EventPayload) => void): this;
+    on(event: HealthCheckEvent.Timeout, listener: (change: HealthCheckStatusChange) => void): this;
+    on(event: HealthCheckEvent.Change, listener: (event: HealthCheckEventPayload) => void): this;
+    on(event: HealthCheckEvent.Up, listener: (event: HealthCheckEventPayload) => void): this;
+    on(event: HealthCheckEvent.Down, listener: (event: HealthCheckEventPayload) => void): this;
     on(event: HealthCheckEvent.Start, listener: () => void): this;
     on(event: HealthCheckEvent.Stop, listener: () => void): this;
     on(event: string, listener: Function): this;
@@ -26,12 +27,22 @@ export class HealthCheck extends EventEmitter {
     private readonly _interval: number;
     private readonly _timeout: number;
 
-    private history: StatusChange[] = [];
+    private history: HealthCheckStatusChange[] = [];
 
     readonly Timeout: HealthCheckTimeout = "timeout";
 
-    constructor(callback: HealthCheckCallback, opts: Options = {}) {
+    constructor(options: Options)
+    constructor(callback: HealthCheckCallback, options?: Options)
+    constructor(cbOrOpts: HealthCheckCallback | Options, opt?: Options) {
         super();
+
+        let options: Options = opt || {}
+        if (typeof cbOrOpts === "object") {
+            options = cbOrOpts
+        }
+        if (typeof cbOrOpts === "function") {
+            options.callback = cbOrOpts;
+        }
 
         const now = new Date();
         this._init = now;
@@ -48,14 +59,21 @@ export class HealthCheck extends EventEmitter {
             timeout: null,
         }
 
-        this._interval = opts.interval || DefaultInterval;
-        this._timeout = opts.timeout || this._interval;
+        this._interval = options.interval || DefaultInterval;
+        this._timeout = options.timeout || this._interval;
 
-        this._callback = callback;
+        this._callback = options.callback;
 
-        if (opts && opts.autoStart) {
-            this.start();
-        }
+        // pass event handlers
+        if (options.onStart) this.on(HealthCheckEvent.Start, options.onStart);
+        if (options.onStop) this.on(HealthCheckEvent.Stop, options.onStop);
+        if (options.onUp) this.on(HealthCheckEvent.Up, options.onUp);
+        if (options.onDown) this.on(HealthCheckEvent.Down, options.onDown);
+        if (options.onChange) this.on(HealthCheckEvent.Change, options.onChange);
+        if (options.onTimeout) this.on(HealthCheckEvent.Timeout, options.onTimeout);
+
+        // auto start
+        if (options.start) this.start();
 
     }
 
@@ -101,7 +119,7 @@ export class HealthCheck extends EventEmitter {
         this._status = status;
 
         // build event payload
-        const eventPayload: EventPayload = {
+        const eventPayload: HealthCheckEventPayload = {
             status,
             timestamp,
             since: status === HealthCheckStatus.Up ? this.upSince : this.downSince,
@@ -128,9 +146,12 @@ export class HealthCheck extends EventEmitter {
         this.history.push({status, timestamp});
     }
 
-    private readonly _callback: HealthCheckCallback;
+    private readonly _callback?: HealthCheckCallback;
 
     private async _check(): Promise<boolean> {
+        if (!this._callback)
+            return false;
+
         const result: boolean = await this._callback();
         return result;
     }
