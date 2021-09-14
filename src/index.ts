@@ -73,10 +73,10 @@ export class HealthCheck extends EventEmitter {
 
         // emit every timeout event and then treat as down
         if (status === this.Timeout) {
-            this.emit(HealthCheckEvent.Timeout, {status,timestamp});
+            status = HealthCheckStatus.Down;
             this._last.timeout = timestamp;
             this._count.timeout++;
-            status = HealthCheckStatus.Down;
+            this.emit(HealthCheckEvent.Timeout, {status, timestamp});
         }
 
         // update last and count
@@ -84,6 +84,9 @@ export class HealthCheck extends EventEmitter {
             this._last.up = timestamp;
             this._count.up++;
         }
+
+        // emit result
+        this.emit(HealthCheckEvent.Result, {status, timestamp});
 
         // if status has not changed return and don't stress about the following
         if (status !== this._status)

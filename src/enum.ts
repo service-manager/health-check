@@ -9,5 +9,6 @@ export enum HealthCheckEvent {
     Change = "change",
     Start = "start",
     Stop = "stop",
-    Timeout = "timeout"
+    Timeout = "timeout",
+    Result = "result"
 }
