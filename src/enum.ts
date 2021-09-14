@@ -1,12 +1,12 @@
-export enum Status {
+export enum HealthCheckStatus {
     Up = "up",
     Down = "down"
 }
 
-export enum Event {
+export enum HealthCheckEvent {
     Up = "up",
     Down = "down",
-    Status = "status",
+    Change = "change",
     Start = "start",
     Stop = "stop",
     Timeout = "timeout"

@@ -1,22 +1,17 @@
 import EventEmitter from "events";
 import {msSince} from "./timeSince";
-import {Status, Event} from "./enum";
+import {HealthCheckStatus, HealthCheckEvent} from "./enum";
 import {EventPayload, Options, StatusChange} from "./interface";
-import {Callback, StatusCount, StatusLast, TimeoutStatus} from "./type";
+import {HealthCheckCallback, StatusCount, StatusLast, HealthCheckTimeout} from "./type";
 const DefaultInterval = 5000;
 
-
-
-
-
-
 export declare interface HealthCheck {
-    on(event: Event.Timeout, listener: (change: StatusChange) => void): this;
-    on(event: 'change', listener: (event: EventPayload) => void): this;
-    on(event: 'healthy', listener: (event: EventPayload) => void): this;
-    on(event: 'unhealthy', listener: (event: EventPayload) => void): this;
-    on(event: 'start', listener: () => void): this;
-    on(event: 'stop', listener: () => void): this;
+    on(event: HealthCheckEvent.Timeout, listener: (change: StatusChange) => void): this;
+    on(event: HealthCheckEvent.Change, listener: (event: EventPayload) => void): this;
+    on(event: HealthCheckEvent.Up, listener: (event: EventPayload) => void): this;
+    on(event: HealthCheckEvent.Down, listener: (event: EventPayload) => void): this;
+    on(event: HealthCheckEvent.Start, listener: () => void): this;
+    on(event: HealthCheckEvent.Stop, listener: () => void): this;
     on(event: string, listener: Function): this;
 }
 
@@ -33,9 +28,9 @@ export class HealthCheck extends EventEmitter {
 
     private history: StatusChange[] = [];
 
-    readonly Timeout: TimeoutStatus = "timeout";
+    readonly Timeout: HealthCheckTimeout = "timeout";
 
-    constructor(callback: Callback, opts: Options = {}) {
+    constructor(callback: HealthCheckCallback, opts: Options = {}) {
         super();
 
         const now = new Date();
@@ -64,13 +59,13 @@ export class HealthCheck extends EventEmitter {
 
     }
 
-    private _status: Status = Status.Down;
+    private _status: HealthCheckStatus = HealthCheckStatus.Down;
 
-    private _setStatus(status: boolean | Status | TimeoutStatus) {
+    private _setStatus(status: boolean | HealthCheckStatus | HealthCheckTimeout) {
 
         // convert boolean to status
         if (status === true || status === false) {
-            status = status ? Status.Up : Status.Down;
+            status = status ? HealthCheckStatus.Up : HealthCheckStatus.Down;
         }
 
         // timestamp of now
@@ -78,14 +73,14 @@ export class HealthCheck extends EventEmitter {
 
         // emit every timeout event and then treat as down
         if (status === this.Timeout) {
-            this.emit(Event.Timeout, {status,timestamp});
+            this.emit(HealthCheckEvent.Timeout, {status,timestamp});
             this._last.timeout = timestamp;
             this._count.timeout++;
-            status = Status.Down;
+            status = HealthCheckStatus.Down;
         }
 
         // update last and count
-        if (status === Status.Up) {
+        if (status === HealthCheckStatus.Up) {
             this._last.up = timestamp;
             this._count.up++;
         }
@@ -96,7 +91,7 @@ export class HealthCheck extends EventEmitter {
 
     }
 
-    private _updateStatus(status: Status, timestamp: Date) {
+    private _updateStatus(status: HealthCheckStatus, timestamp: Date) {
 
         // update status
         const lastStatus = this._status;
@@ -106,17 +101,17 @@ export class HealthCheck extends EventEmitter {
         const eventPayload: EventPayload = {
             status,
             timestamp,
-            since: status === Status.Up ? this.upSince : this.downSince,
-            for: status === Status.Up ? this.upFor : this.downFor
+            since: status === HealthCheckStatus.Up ? this.upSince : this.downSince,
+            for: status === HealthCheckStatus.Up ? this.upFor : this.downFor
         }
 
-        this.emit(Event.Status, eventPayload);
+        this.emit(HealthCheckEvent.Change, eventPayload);
 
         // emit up and down events
-        if (lastStatus === Status.Up && status !== Status.Up)
-            this.emit(Event.Down, eventPayload);
-        if (lastStatus !== Status.Up && status === Status.Up)
-            this.emit(Event.Up , eventPayload);
+        if (lastStatus === HealthCheckStatus.Up && status !== HealthCheckStatus.Up)
+            this.emit(HealthCheckEvent.Down, eventPayload);
+        if (lastStatus !== HealthCheckStatus.Up && status === HealthCheckStatus.Up)
+            this.emit(HealthCheckEvent.Up , eventPayload);
 
         // set last status change timestamp
         this._changedAt = timestamp;
@@ -125,19 +120,19 @@ export class HealthCheck extends EventEmitter {
         this._addHistory(status, timestamp);
     }
 
-    private _addHistory(status: Status, timestamp: Date) {
+    private _addHistory(status: HealthCheckStatus, timestamp: Date) {
         // TODO: allow for maximum number of history entries (garbage collection to prevent memory consumption)
         this.history.push({status, timestamp});
     }
 
-    private readonly _callback: Callback;
+    private readonly _callback: HealthCheckCallback;
 
     private async _check(): Promise<boolean> {
         const result: boolean = await this._callback();
         return result;
     }
 
-    private async _wait(): Promise<TimeoutStatus> {
+    private async _wait(): Promise<HealthCheckTimeout> {
         return await new Promise((resolve) => {
             let id = setTimeout(() => {
                 clearTimeout(id);
@@ -160,17 +155,17 @@ export class HealthCheck extends EventEmitter {
         if (!this._timer) return;
         clearInterval(this._timer);
         this._timer = null;
-        this.emit(Event.Timeout);
+        this.emit(HealthCheckEvent.Timeout);
     }
 
     start() {
         this.stop();
         this._timer = setInterval(this._tick.bind(this), this._interval);
-        this.emit(Event.Start);
+        this.emit(HealthCheckEvent.Start);
     }
 
     get isUp(): boolean {
-        return this._status === Status.Up;
+        return this._status === HealthCheckStatus.Up;
     }
 
     get isDown(): boolean {

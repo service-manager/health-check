@@ -10,9 +10,9 @@ export type StatusLast = {
     timeout: Date | null
 }
 
-export type Result = Promise<boolean> | boolean;
+export type HealthCheckResult = Promise<boolean> | boolean;
 
-export type Callback = () => Result;
+export type HealthCheckCallback = () => HealthCheckResult;
 
-export type TimeoutStatus = "timeout";
+export type HealthCheckTimeout = "timeout";
 

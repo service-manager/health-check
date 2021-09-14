@@ -1,4 +1,4 @@
-import {Status} from "./enum";
+import {HealthCheckStatus} from "./enum";
 
 export interface Options {
     interval?: number,
@@ -8,7 +8,7 @@ export interface Options {
 
 export interface StatusChange {
     timestamp: Date,
-    status: Status
+    status: HealthCheckStatus
 }
 
 export interface EventPayload extends StatusChange {
