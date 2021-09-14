@@ -40,6 +40,16 @@ export interface Options {
     autoStart?: boolean;
 }
 
+export declare interface HealthCheck {
+    on(event: 'timeout', listener: (change: StatusChange) => void): this;
+    on(event: 'change', listener: (event: EventPayload) => void): this;
+    on(event: 'healthy', listener: (event: EventPayload) => void): this;
+    on(event: 'unhealthy', listener: (event: EventPayload) => void): this;
+    on(event: 'start', listener: () => void): this;
+    on(event: 'stop', listener: () => void): this;
+    on(event: string, listener: Function): this;
+}
+
 export class HealthCheck extends EventEmitter {
 
     private readonly _init: Date;
