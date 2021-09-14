@@ -1,5 +1,5 @@
 import EventEmitter from "events";
-import {msSince} from "./timeSince";
+import {msSince} from "./function";
 import {HealthCheckStatus, HealthCheckEvent} from "./enum";
 import {EventPayload, Options, StatusChange} from "./interface";
 import {HealthCheckCallback, StatusCount, StatusLast, HealthCheckTimeout} from "./type";
