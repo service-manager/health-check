@@ -1,5 +1,6 @@
 import EventEmitter from "events";
 import {msSince} from "./timeSince";
+import {Status} from "./enum";
 
 const DefaultInterval = 5000;
 
@@ -15,10 +16,7 @@ type StatusLast = {
 }
 
 
-export enum Status {
-    Up = "up",
-    Down = "down"
-}
+
 export type TimeoutStatus = "timeout";
 export const TimeoutStatus: TimeoutStatus = "timeout";
 
