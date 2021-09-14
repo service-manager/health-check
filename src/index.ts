@@ -31,9 +31,9 @@ export class HealthCheck extends EventEmitter {
 
     readonly Timeout: HealthCheckTimeout = "timeout";
 
-    constructor(options: HealthCheckOptions)
-    constructor(callback: HealthCheckCallback, options?: HealthCheckOptions)
-    constructor(cbOrOpts: HealthCheckCallback | HealthCheckOptions, opt?: HealthCheckOptions) {
+    constructor(options?: HealthCheckOptions)
+    constructor(callback?: HealthCheckCallback, options?: HealthCheckOptions)
+    constructor(cbOrOpts?: HealthCheckCallback | HealthCheckOptions, opt?: HealthCheckOptions) {
         super();
 
         let options: HealthCheckOptions = opt || {}
