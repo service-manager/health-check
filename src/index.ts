@@ -1,6 +1,7 @@
 import EventEmitter from "events";
 import {msSince} from "./timeSince";
 import {Status} from "./enum";
+import {EventPayload, StatusChange} from "./interface";
 
 const DefaultInterval = 5000;
 
@@ -23,20 +24,7 @@ export const TimeoutStatus: TimeoutStatus = "timeout";
 export type Result = Promise<boolean> | boolean;
 export type Callback = () => Result;
 
-export interface StatusChange {
-    timestamp: Date,
-    status: Status
-}
-export interface EventPayload extends StatusChange {
-    since?: Date | null,
-    for?: number | null,
-}
 
-export interface Options {
-    interval?: number,
-    timeout?: number
-    autoStart?: boolean;
-}
 
 export declare interface HealthCheck {
     on(event: 'timeout', listener: (change: StatusChange) => void): this;
